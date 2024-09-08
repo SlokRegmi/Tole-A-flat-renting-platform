@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from grpc import Status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import UserSerializer
@@ -20,11 +21,11 @@ class RegisterView(APIView):
             # Print confirmation that registration is successful
             print("Registration successful for user:", serializer.data.get('email'))
             
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=Status.HTTP_201_CREATED)
         
         # Print any validation errors
         print("Registration failed:", serializer.errors)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=Status.HTTP_400_BAD_REQUEST)
 
 class LoginView (APIView):
     def post(self,request):
