@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
@@ -7,10 +9,10 @@ import { PasswordInput } from "../ui/passwordinput";
 import { PhoneInput } from "../ui/phoneinput";
 import { FormField } from "./formfield";
 import axios from "axios";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation"; // Updated import
 
 export default function SignupForm() {
-  const router = useRouter();
+  const router = useRouter(); // Using new useRouter from next/navigation
   const [formData, setFormData] = useState({
     fName: "",
     lName: "",
@@ -49,7 +51,7 @@ export default function SignupForm() {
 
       if (response.status === 201) {
         // Registration successful, redirect to login or home page
-        router.push("/login");
+        router.push("/login"); // Use router.push to navigate to the login page
       }
     } catch (error) {
       console.error("Error registering user", error);
