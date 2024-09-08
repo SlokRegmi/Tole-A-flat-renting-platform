@@ -28,28 +28,47 @@ class RegisterView(APIView):
         print("Registration failed:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
 
-class LoginView (APIView):
-    def post(self,request):
+class LoginView(APIView):
+    def post(self, request):
         email = request.data['email']
         password = request.data['password']
+        
         user = User.objects.filter(email=email).first()
         if user is None:
-            raise AuthenticationFailed('User not found')
+            return Response(
+                {
+                    'message': 'User not found'
+                },
+                status=status.HTTP_404_NOT_FOUND 
+            )
         
         if not user.check_password(password):
-            raise AuthenticationFailed('Incorrect password')
+            return Response(
+                {
+                    'message': 'Incorrect password'
+                },
+                status=status.HTTP_401_UNAUTHORIZED  
+            )
         
         payload = {
-            'id':user.id,
-            'exp':datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
-            'iat':datetime.datetime.utcnow()
+            'id': user.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+            'iat': datetime.datetime.utcnow()
         }
-
-        token = jwt.encode(payload,'secret',algorithm='HS256')
-        response = Response()
-        response.set_cookie(key='jwt',value=token,httponly=True)
-        response.data = {'jwt' : token}
+        
+        token = jwt.encode(payload, 'secret', algorithm='HS256')
+        
+        response = Response(
+            {
+                'message': 'Login successful',
+                'jwt': token
+            },
+            status=status.HTTP_200_OK  
+        )
+        response.set_cookie(key='jwt', value=token, httponly=True)
+        
         return response
+
 
         
 class UserView(APIView):
