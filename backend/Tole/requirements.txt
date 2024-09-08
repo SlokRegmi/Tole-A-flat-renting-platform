@@ -1,0 +1,5 @@
+django>=4.1
+djangorestframework>=3.13
+mysqlclient>=2.1
+django-cors-headers>=3.13
+djangorestframework-simplejwt>=5.2  # For JWT authentication

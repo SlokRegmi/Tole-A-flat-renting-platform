@@ -7,11 +7,24 @@ from rest_framework.exceptions import AuthenticationFailed
 import jwt, datetime
 # Create your views here.
 class RegisterView(APIView):
-    def post(self,request):
-        serializer = UserSerializer(data = request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+    def post(self, request):
+        # Print the incoming data to the console for debugging
+        print("Received registration data:", request.data)
+        
+        # Proceed with the normal registration process
+        serializer = UserSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            
+            # Print confirmation that registration is successful
+            print("Registration successful for user:", serializer.data.get('email'))
+            
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        # Print any validation errors
+        print("Registration failed:", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView (APIView):
     def post(self,request):
