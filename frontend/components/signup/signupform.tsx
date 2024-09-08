@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
@@ -7,10 +9,10 @@ import { PasswordInput } from "../ui/passwordinput";
 import { PhoneInput } from "../ui/phoneinput";
 import { FormField } from "./formfield";
 import axios from "axios";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation"; // Updated import
 
 export default function SignupForm() {
-  const router = useRouter();
+  const router = useRouter(); // Using new useRouter from next/navigation
   const [formData, setFormData] = useState({
     fName: "",
     lName: "",
@@ -39,17 +41,17 @@ export default function SignupForm() {
     }
 
     try {
-      const response = await axios.post("http://localhost:8000/register/", {
-        first_name: formData.fName,
-        last_name: formData.lName,
+      const response = await axios.post("http://localhost:8000/api/register", {
+        firstname: formData.fName,
+        lastname: formData.lName,
         email: formData.email,
-        phone: formData.phone,
+        phoneno: formData.phone,
         password: formData.password,
       });
 
       if (response.status === 201) {
         // Registration successful, redirect to login or home page
-        router.push("/login");
+        router.push("/login"); // Use router.push to navigate to the login page
       }
     } catch (error) {
       console.error("Error registering user", error);

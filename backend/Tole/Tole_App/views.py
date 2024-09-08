@@ -6,26 +6,27 @@ from .serializers import UserSerializer
 from .models import User
 from rest_framework.exceptions import AuthenticationFailed
 import jwt, datetime
+from rest_framework import status
 # Create your views here.
 class RegisterView(APIView):
     def post(self, request):
         # Print the incoming data to the console for debugging
         print("Received registration data:", request.data)
-        
+
         # Proceed with the normal registration process
         serializer = UserSerializer(data=request.data)
-        
+
         if serializer.is_valid():
             serializer.save()
-            
+
             # Print confirmation that registration is successful
             print("Registration successful for user:", serializer.data.get('email'))
-            
-            return Response(serializer.data, status=Status.HTTP_201_CREATED)
-        
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         # Print any validation errors
         print("Registration failed:", serializer.errors)
-        return Response(serializer.errors, status=Status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
 
 class LoginView (APIView):
     def post(self,request):
@@ -44,7 +45,7 @@ class LoginView (APIView):
             'iat':datetime.datetime.utcnow()
         }
 
-        token = jwt.encode(payload,'secret',algorithm='HS256').decode('utf-8')
+        token = jwt.encode(payload,'secret',algorithm='HS256')
         response = Response()
         response.set_cookie(key='jwt',value=token,httponly=True)
         response.data = {'jwt' : token}
