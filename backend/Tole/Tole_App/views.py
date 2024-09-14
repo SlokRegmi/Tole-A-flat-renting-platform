@@ -2,10 +2,11 @@ from django.shortcuts import render
 from grpc import Status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import UserSerializer
-from .models import User
+from .serializers import PlaceSerializer, UserSerializer
+from .models import Place, User
 from rest_framework.exceptions import AuthenticationFailed
 import jwt, datetime
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 # Create your views here.
 class RegisterView(APIView):
@@ -93,3 +94,25 @@ class LogoutView(APIView):
             'message':'success'
         }
         return response
+class PlaceCreateView(APIView):
+    parser_classes = (MultiPartParser, FormParser)  # To handle file uploads (images)
+
+    def post(self, request, *args, **kwargs):
+        place_serializer = PlaceSerializer(data=request.data)
+        if place_serializer.is_valid():
+            place_serializer.save()
+            return Response(place_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(place_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class PlaceDetailView(APIView):
+    def get(self, request, *args, **kwargs):
+        category = request.query_params.get('category', None)
+        if category:
+            places = Place.objects.filter(category=category)
+        else:
+            places = Place.objects.all()
+        if places.exists():
+            serializer = PlaceSerializer(places, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'No places found'}, status=status.HTTP_404_NOT_FOUND)

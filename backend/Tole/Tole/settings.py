@@ -10,8 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
+import cloudinary_storage
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,8 +45,15 @@ INSTALLED_APPS = [
     'rest_framework',
     'Tole_App',
     'corsheaders',
+    'cloudinary',
+    'cloudinary_storage',
 ]
-
+cloudinary.config( 
+    cloud_name = 'dj2dxlequ',
+    api_key = '125599991123991',
+    api_secret = '', # API KEY OF CLOUDINART
+        )
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -133,3 +145,4 @@ AUTH_USER_MODEL = 'Tole_App.User'
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
+

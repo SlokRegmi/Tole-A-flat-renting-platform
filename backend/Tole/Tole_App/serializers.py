@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User
+from .models import Place, User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -16,3 +16,9 @@ class UserSerializer(serializers.ModelSerializer):
                 instance.set_password(password)
             instance.save()
             return instance
+
+class PlaceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Place
+        fields = '__all__'
+        fields = ['id','name','latitude','longitude','city','image1','image2','image3','image4','created_at']
