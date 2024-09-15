@@ -94,8 +94,9 @@ class LogoutView(APIView):
             'message':'success'
         }
         return response
+
 class PlaceCreateView(APIView):
-    parser_classes = (MultiPartParser, FormParser)  # To handle file uploads (images)
+    parser_classes = (MultiPartParser, FormParser)  # To handle file uploads
 
     def post(self, request, *args, **kwargs):
         place_serializer = PlaceSerializer(data=request.data)
@@ -104,6 +105,7 @@ class PlaceCreateView(APIView):
             return Response(place_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(place_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class PlaceDetailView(APIView):
     def get(self, request, *args, **kwargs):
         category = request.query_params.get('category', None)

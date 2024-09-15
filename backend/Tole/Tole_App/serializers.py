@@ -17,8 +17,49 @@ class UserSerializer(serializers.ModelSerializer):
             instance.save()
             return instance
 
+
+
 class PlaceSerializer(serializers.ModelSerializer):
+    image1_url = serializers.SerializerMethodField()
+    image2_url = serializers.SerializerMethodField()
+    image3_url = serializers.SerializerMethodField()
+    image4_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Place
-        fields = '__all__'
-        fields = ['id','name','latitude','longitude','city','image1','image2','image3','image4','created_at']
+        fields = [
+            'id',
+            'name',
+            'latitude',
+            'longitude',
+            'city',
+            'image1',
+            'image2',
+            'image3',
+            'image4',
+            'image1_url',
+            'image2_url',
+            'image3_url',
+            'image4_url',
+            'created_at',
+        ]
+
+    def get_image1_url(self, obj):
+        if obj.image1 and hasattr(obj.image1, 'url'):
+            return obj.image1.url
+        return None
+
+    def get_image2_url(self, obj):
+        if obj.image2 and hasattr(obj.image2, 'url'):
+            return obj.image2.url
+        return None
+
+    def get_image3_url(self, obj):
+        if obj.image3 and hasattr(obj.image3, 'url'):
+            return obj.image3.url
+        return None
+
+    def get_image4_url(self, obj):
+        if obj.image4 and hasattr(obj.image4, 'url'):
+            return obj.image4.url
+        return None

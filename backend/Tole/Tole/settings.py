@@ -51,8 +51,11 @@ INSTALLED_APPS = [
 cloudinary.config( 
     cloud_name = 'dj2dxlequ',
     api_key = '125599991123991',
-    api_secret = '', # API KEY OF CLOUDINART
+    api_secret = 'FA5PYSEcuyuMJ_RFAfRcMRHuwuo', # API KEY OF CLOUDINART
         )
+CLOUDINARY_STORAGE = {
+    'CLOUDINARY_URL':'cloudinary://125599991123991:FA5PYSEcuyuMJ_RFAfRcMRHuwuo@dj2dxlequ',
+}
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
