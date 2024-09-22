@@ -51,7 +51,7 @@ INSTALLED_APPS = [
 cloudinary.config( 
     cloud_name = 'dj2dxlequ',
     api_key = '125599991123991',
-    api_secret = 'FA5PYSEcuyuMJ_RFAfRcMRHuwuo', # API KEY OF CLOUDINART
+    api_secret = 'fghgjklhgfdsadfghjmgfddfgfhjhgfdfghdghmhhnfhdhjmhgnfds', # API KEY OF CLOUDINART
         )
 CLOUDINARY_STORAGE = {
     'CLOUDINARY_URL':'cloudinary://125599991123991:FA5PYSEcuyuMJ_RFAfRcMRHuwuo@dj2dxlequ',
@@ -67,6 +67,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
+KHALTI_SECRET_KEY = "KKEEY"   # API KEY OF KHALTI 
 
 ROOT_URLCONF = 'Tole.urls'
 
