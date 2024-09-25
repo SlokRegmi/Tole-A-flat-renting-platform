@@ -2,7 +2,6 @@ from django.shortcuts import render
 from grpc import Status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
 from Tole import settings
 from .serializers import PlaceSerializer, UserSerializer
 from .models import Place, User
@@ -17,6 +16,95 @@ import requests
 import json
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from rest_framework.views import APIView
+from django.urls import reverse
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import redirect
+import requests
+from django.conf import settings
+
+class DataFillPlaces(APIView):
+    def get(self, request):
+        places = [
+            {
+                'name': 'Patan Durbar Square',
+                'latitude': 27.6789,
+                'longitude': 85.3240,
+                'city': 'lalitpur',
+                'image1': '//image//a.png',
+                'price': 1000
+            },
+            {
+                'name': 'Bhaktapur Durbar Square',
+                'latitude': 27.6710,
+                'longitude': 85.4296,
+                'city': 'bhaktapur',
+                'image1': '//image//b.jpg',
+                'price': 1500
+            },
+            {
+                'name': 'Swayambhunath Stupa',
+                'latitude': 27.7149,
+                'longitude': 85.2903,
+                'city': 'kathmandu',
+                'image1': '//image//c.png',
+                'price': 2000
+            },
+            {
+                'name': 'Boudhanath Stupa',
+                'latitude': 27.7211,
+                'longitude': 85.3616,
+                'city': 'kathmandu',
+                'image1': '//image//d.png',
+                'price': 2500
+            },
+            {
+                'name': 'Chandragiri Hills',
+                'latitude': 27.6526,
+                'longitude': 85.2866,
+                'city': 'kathmandu',
+                'image1': '//image//a.png',
+                'price': 3000
+            },
+            {
+                'name': 'Nagarkot',
+                'latitude': 27.7172,
+                'longitude': 85.5162,
+                'city': 'bhaktapur',
+                'image1': '//image//b.jpg',
+                'price': 3500
+            },
+            {
+                'name': 'Pokhara',
+                'latitude': 28.2096,
+                'longitude': 83.9856,
+                'city': 'pokhara',
+                'image1': '//image//c.png',
+                'price': 4000
+            },
+            {
+                'name': 'Lumbini',
+                'latitude': 27.4840,
+                'longitude': 83.2767,
+                'city': 'lumbini',
+                'image1': '//image//d.png',
+                'price': 4500
+            }
+        ]
+
+        for place in places:
+            place_obj = Place(
+                name=place.get('name'),
+                latitude=place.get('latitude'),
+                longitude=place.get('longitude'),
+                city=place.get('city'),
+                image1=place.get('image1'),
+                price=place.get('price')
+            )
+        place_obj.save()
+
+
+        return Response({'message': 'Places added successfully'}, status=status.HTTP_201_CREATED)
 
 # Create your views here.
 class RegisterView(APIView):
@@ -120,26 +208,27 @@ class PlaceDetailView(APIView):
     def get(self, request, *args, **kwargs):
         category = request.query_params.get('category', None)
         if category:
-            places = Place.objects.filter(category=category)
+            places = Place.objects.filter(city=category)
         else:
             places = Place.objects.all()
         if places.exists():
-            serializer = PlaceSerializer(places, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            data = [{'latitude' : place.latitude, 'longitude' : place.longitude, 'id' : place.place_id} for place in places]
+            return Response(data, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'No places found'}, status=status.HTTP_404_NOT_FOUND)
         
 
-class Payment(APIView):
 
+class PlaceDescriptionView(APIView):
+    def get(self, request, *args, **kwargs):
+        place_id = kwargs.get('place_id')
+        place = Place.objects.filter(place_id=place_id).first()
+        if place:
+            serializer = PlaceSerializer(place)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Place not found'}, status=status.HTTP_404_NOT_FOUND)
 
-
- from rest_framework.views import APIView
-from django.urls import reverse
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import redirect
-import requests
-from django.conf import settings
 
 class Payment(APIView):
 
