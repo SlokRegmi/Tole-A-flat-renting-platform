@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.shortcuts import render
 from grpc import Status
 from rest_framework.views import APIView
@@ -22,6 +23,11 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect
 import requests
 from django.conf import settings
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from django.http import JsonResponse
+from django.conf import settings
+import requests
 
 class DataFillPlaces(APIView):
     def get(self, request):
@@ -101,7 +107,7 @@ class DataFillPlaces(APIView):
                 image1=place.get('image1'),
                 price=place.get('price')
             )
-        place_obj.save()
+            place_obj.save()
 
 
         return Response({'message': 'Places added successfully'}, status=status.HTTP_201_CREATED)
@@ -123,47 +129,58 @@ class RegisterView(APIView):
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        # Print any validation errors
         print("Registration failed:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
 
+import jwt  # Import PyJWT
+import datetime
+from django.conf import settings
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
+from .models import User  # Adjust this import based on your models
+
 class LoginView(APIView):
     def post(self, request):
-        email = request.data['email']
-        password = request.data['password']
+        email = request.data.get('email')
+        password = request.data.get('password')
         
+        # Get the user by email
         user = User.objects.filter(email=email).first()
         if user is None:
             return Response(
-                {
-                    'message': 'User not found'
-                },
-                status=status.HTTP_404_NOT_FOUND 
+                {'message': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
             )
         
+        # Check if the password is correct
         if not user.check_password(password):
             return Response(
-                {
-                    'message': 'Incorrect password'
-                },
-                status=status.HTTP_401_UNAUTHORIZED  
+                {'message': 'Incorrect password'},
+                status=status.HTTP_401_UNAUTHORIZED
             )
         
+        # Create the payload for the JWT token
         payload = {
-            'id': user.id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
-            'iat': datetime.datetime.utcnow()
+            'id': user.id,  # Use user.id or any unique identifier
+            'firstname': user.firstname,  # Additional data you may want to include
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),  # Expiration time
+            'iat': datetime.datetime.utcnow(),  # Issued at time
         }
         
-        token = jwt.encode(payload, 'secret', algorithm='HS256')
+        # Encode the payload using PyJWT and your secret key
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')  # Use the 'HS256' algorithm
         
+        # Send the decoded payload along with the token
         response = Response(
             {
-                'message': 'Login successful',
-                'jwt': token
+                'jwt': token,  # Send the token as normal
+                'payload': payload  # Send the decoded information (e.g., user ID, firstname)
             },
-            status=status.HTTP_200_OK  
+            status=status.HTTP_200_OK
         )
+        
+        # Optionally, set the token as an HttpOnly cookie
         response.set_cookie(key='jwt', value=token, httponly=True)
         
         return response
@@ -206,22 +223,16 @@ class PlaceCreateView(APIView):
 
 class PlaceDetailView(APIView):
     def get(self, request, *args, **kwargs):
-        category = request.query_params.get('category', None)
-        if category:
-            places = Place.objects.filter(city=category)
-        else:
             places = Place.objects.all()
-        if places.exists():
-            data = [{'latitude' : place.latitude, 'longitude' : place.longitude, 'id' : place.place_id} for place in places]
+            data = [{'name':place.name,'lat' : place.latitude, 'lng' : place.longitude, 'id' : place.place_id, 'im1': "https://asset.cloudinary.com/dj2dxlequ/893e89a8bbe473e308f4c9c5a23113b5", "im2" : "https://asset.cloudinary.com/dj2dxlequ/02dd548ab8beaa18fb56cc9b162fad5a", "im3" : "https://asset.cloudinary.com/dj2dxlequ/fd3514f1600791caef7ec16127170fb9", "im4" : "https://asset.cloudinary.com/dj2dxlequ/c2191f1647769ed9a691cb954de932a8"} for place in places]
             return Response(data, status=status.HTTP_200_OK)
-        else:
-            return Response({'error': 'No places found'}, status=status.HTTP_404_NOT_FOUND)
         
 
 
 class PlaceDescriptionView(APIView):
     def get(self, request, *args, **kwargs):
-        place_id = kwargs.get('place_id')
+
+        place_id = request.data['place_id']
         place = Place.objects.filter(place_id=place_id).first()
         if place:
             serializer = PlaceSerializer(place)
@@ -229,20 +240,26 @@ class PlaceDescriptionView(APIView):
         else:
             return Response({'error': 'Place not found'}, status=status.HTTP_404_NOT_FOUND)
 
+import uuid
 
 class Payment(APIView):
 
-    def post(self, request, *args, **kwargs): 
+    def post(self, request, *args, **kwargs):
+        # Generate unique purchase order ID
+        purchase_order_id = str(uuid.uuid4())  # Unique ID for the order
+        user =  User.objects.get(id=request.data['id'])  
+        place = Place.objects.get(place_id=request.data['place_id'])      
+
         data = {
-            "return_url": request.build_absolute_uri(reverse('payment_success')),  # Dynamically generate return URL
-            "website_url":"HTTPS://your.com",  # Dynamically generate website URL
-            "amount": request.data['amount'],  # in paisa, so 130000 paisa = 1300 NPR
-            "purchase_order_id": "id_123456789",
+            "return_url": request.build_absolute_uri(reverse('payment_success')),  # Return URL
+            "website_url": request.build.absolute_uri(reverse('places')),  # Website URL
+            "amount": place.price,  # Amount in paisa (100 paisa = 1 NPR)
+            "purchase_order_id": purchase_order_id,  # Dynamic purchase order ID
             "purchase_order_name": "Room renting",
             "customer_info": {
-                "name": request.data['name'],
-                "email": request.data['email'],
-                "phone": request.data['phone']
+                "name": user.first_name,
+                "email": user.email,
+                "phone": user.phone_no
             }
         }
 
@@ -259,17 +276,62 @@ class Payment(APIView):
         else:
             return JsonResponse({"error": response.json()}, status=response.status_code)
 
-    def get(self, request, *args, **kwargs):  # This will handle GET requests
-        pidx = request.GET.get('pidx')
-        status = request.GET.get('status')
-        transaction_id = request.GET.get('transaction_id')
-        amount = request.GET.get('amount')
 
-        if status == "Completed":
-            return HttpResponse(f"Payment successful with Transaction ID: {transaction_id}")
-        elif status == "Pending":
-            return HttpResponse("Payment pending. Please check again later.")
-        else:
-            return HttpResponse("Payment failed or was canceled.")
+# Google AUTH 
 
+from django.contrib.auth import get_user_model
 
+import logging
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
+def google_login(request):
+    google_auth_url = (
+        f"https://accounts.google.com/o/oauth2/v2/auth?"
+        f"client_id={settings.GOOGLE_CLIENT_ID}&"
+        f"redirect_uri={settings.GOOGLE_REDIRECT_URI}&"
+        f"response_type=code&"
+        f"scope=openid email profile"  # Ensure these scopes are URL encoded if necessary
+    )
+    return JsonResponse({"url": google_auth_url})
+
+User = get_user_model()
+def google_callback(request):
+    code = request.GET.get('code')
+    token_url = 'https://oauth2.googleapis.com/token'
+    token_data = {
+        'code': code,
+        'client_id': settings.GOOGLE_CLIENT_ID,
+        'client_secret': settings.GOOGLE_CLIENT_SECRET,
+        'redirect_uri': settings.GOOGLE_REDIRECT_URI,
+        'grant_type': 'authorization_code',
+    }
+
+    try:
+        r = requests.post(token_url, data=token_data)
+        r.raise_for_status()  # Raise an error for bad responses
+        token_json = r.json()
+
+        idinfo = id_token.verify_oauth2_token(token_json['id_token'], google_requests.Request(), settings.GOOGLE_CLIENT_ID)
+        
+        email = idinfo.get('email')
+        first_name = idinfo.get('given_name')
+        last_name = idinfo.get('family_name')
+
+        user, created = User.objects.get_or_create(email=email, defaults={
+            'first_name': first_name,
+            'last_name': last_name,
+        })
+
+        if created:
+            user.set_unusable_password()  # No password required since it's Google login
+            user.save()
+
+        return JsonResponse({"email": user.email, "name": f"{user.first_name} {user.last_name}"})
+    
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({'error': f"Token request failed: {str(e)}"}, status=400)
+    except ValueError as e:
+        return JsonResponse({'error': f"Invalid token: {str(e)}"}, status=400)
+    except IntegrityError as e:
+        return JsonResponse({'error': str(e)}, status=500)

@@ -25,7 +25,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
 
   return (
     <div className="grid w-full max-w-sm items-center gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id} className='text-[16px]'>{label}</Label>
       <div className="relative">
         <Input
           id={id}

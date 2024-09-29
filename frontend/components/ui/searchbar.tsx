@@ -5,11 +5,11 @@ import { Search } from 'lucide-react';
 
 const SearchBar = () => {
   return (
-    <div className="flex items-center max-w-lg rounded-full w-[463px] h-[48px] ">
+    <div className="flex items-center max-w-lg rounded-full w-[695px] h-[52px] ">
       {/* Search Input */}
       <Input
         type="text"
-        placeholder="Search"
+        placeholder="Search an area, city or location...."
         className="flex placeholder:text-black py-2 pl-4 rounded-l-full  focus:border-none focus:outline-none border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-secondary"
       />
       {/* Search Button with Icon */}

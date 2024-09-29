@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import DataFillPlaces, Payment, PlaceCreateView, PlaceDescriptionView, PlaceDetailView, RegisterView,LoginView,UserView,LogoutView
+from .views import DataFillPlaces, Payment, PlaceCreateView, PlaceDescriptionView, PlaceDetailView, RegisterView,LoginView,UserView,LogoutView, google_callback, google_login
 urlpatterns = [
     path('register',RegisterView.as_view()),
     path('login',LoginView.as_view()),
@@ -12,5 +12,7 @@ urlpatterns = [
     path('payment/success', Payment.as_view(), name='payment_success'),
     path('places/<int:place_id>', PlaceDescriptionView.as_view()),
     path('dumdata', DataFillPlaces.as_view()),
+    path('auth/login', google_login, name='google_login'),
+    path('auth/callback', google_callback, name='google_callback'),
 
 ]

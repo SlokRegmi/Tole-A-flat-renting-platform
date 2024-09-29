@@ -50,12 +50,26 @@ export default function SignupForm() {
       });
 
       if (response.status === 201) {
-        // Registration successful, redirect to login or home page
-        router.push("/login"); // Use router.push to navigate to the login page
+        // Registration successful, redirect to login page
+        alert(response.data.message);  // Show a success message
+        router.push("/login");         // Navigate to login page
       }
-    } catch (error) {
-      console.error("Error registering user", error);
-      alert("Registration failed. Please try again.");
+    } catch (error: unknown) { // Explicitly typing the error as 'unknown'
+      if (axios.isAxiosError(error)) { // This checks if it's an axios error
+        if (error.response) {
+          // Server returned an error response (e.g., validation errors)
+          console.error("Registration failed", error.response.data);
+          alert("Registration failed: " + JSON.stringify(error.response.data)); // Display server error messages
+        } else {
+          // Network or other error
+          console.error("Error registering user", error);
+          alert("Registration failed. Please try again.");
+        }
+      } else {
+        // Handle any non-axios errors
+        console.error("An unexpected error occurred", error);
+        alert("An unexpected error occurred. Please try again.");
+      }
     }
   };
 
@@ -85,15 +99,15 @@ export default function SignupForm() {
             <Checkbox id="terms" checked={formData.terms} onChange={handleChange} />
             <Label htmlFor="terms" className="ml-2">
               I agree to all the{" "}
-              <a href="/terms" className="underline text-blue-600">
+              <a href="/terms" className=" text-blue-600 font-bold">
                 Terms
               </a>
               ,{" "}
-              <a href="/privacy" className="underline text-blue-600">
+              <a href="/privacy" className=" text-blue-600 font-bold">
                 Privacy Policy
               </a>
               , and{" "}
-              <a href="/fees" className="underline text-blue-600">
+              <a href="/fees" className=" text-blue-600 font-bold">
                 Fees
               </a>
               .
@@ -102,15 +116,15 @@ export default function SignupForm() {
         </div>
 
         <div className="col-span-1 md:col-span-2">
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full font-bold text-[16px]">
             Create Account
           </Button>
         </div>
 
-        <div className="col-span-1 md:col-span-2 text-center">
+        <div className="col-span-1 md:col-span-1 text-center font-bold">
           <p>
             Already have an account?{" "}
-            <a href="/login" className="underline text-blue-600">
+            <a href="/login" className=" text-blue-600 hover:underline">
               Log in
             </a>
           </p>

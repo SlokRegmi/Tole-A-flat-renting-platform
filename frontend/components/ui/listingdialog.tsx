@@ -17,9 +17,11 @@ interface ModalProps {
         phone: string;
     };
     dimensions?: string;
-    images?: string[];
+    im1: string;
+    im2: string;
+    im3: string;
+    im4: string;
 }
-
 
 const ListingModal: React.FC<ModalProps> = ({
     isOpen,
@@ -32,19 +34,20 @@ const ListingModal: React.FC<ModalProps> = ({
     price,
     landlordDetails,
     dimensions,
-    images,
+    im1,
+    im2, im3, im4
 }) => {
     if (!isOpen) return null; // Don't render anything if the modal is closed
     const locationData = [{ name: title, lat: lat, lng: lng }];
 
-    
     return (
         <div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] w-full"
+            className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000] w-full transition-all duration-300 ${isOpen ? 'backdrop-blur-sm' : ''
+                }`} // Add blur effect when modal is open
             onClick={onClose}
         >
             <div
-                className="bg-white p-6 rounded-lg shadow-lg  grid grid-cols-2 gap-4 w-[1224px] h-[773px]"
+                className="bg-white rounded-xl shadow-lg  grid grid-cols-2 gap-4 w-[1224px] h-[693px] overflow-hidden"
                 onClick={(e) => e.stopPropagation()} // Prevent click propagation to close modal when clicking inside
             >
                 <div>
@@ -66,42 +69,52 @@ const ListingModal: React.FC<ModalProps> = ({
                         <p className="text-gray-700">Yes</p>
                     </div>
 
-                    {/* <div className="mb-4">
-            <p className="text-gray-900 font-semibold">Landlord details</p>
-            <p className="text-gray-700">Name: {landlordDetails.name}</p>
-            <p className="text-gray-700">Phone number: {landlordDetails.phone}</p>
-          </div> */}
-
                     <div className="mb-4">
                         <p className="text-gray-900 font-semibold">Dimensions</p>
                         <p className="text-gray-700">{dimensions}</p>
                     </div>
 
                     <div className="mt-4 flex gap-4">
-                        <Button className='w-[253px] h-[40px]'
-                        >
-                            Request a tour
-                        </Button>
-                        <Button
-                            variant={"secondary"} className='w-[253px] h-[40px]'>
+                        <Button className="w-[253px] h-[40px]">Request a tour</Button>
+                        <Button variant={"secondary"} className="w-[253px] h-[40px]">
                             Message
                         </Button>
                     </div>
                 </div>
 
-                <div className="flex flex-col">
-                    <p className="text-gray-900 font-semibold mb-2">Map</p>
-                    <div className="bg-gray-200 w-full h-[300px] mb-4 flex items-center justify-center overflow-hidden">
-                    <ListingMapComponent locations={locationData} />
+                <div className="flex flex-col w-full h-full bg-black">
+                    {/* First 50% - Map */}
+                    <div className="bg-gray-200 w-full h-1/2 flex items-center justify-center overflow-hidden">
+                        <ListingMapComponent locations={locationData} />
                     </div>
 
-                    {/* <p className="text-gray-900 font-semibold mb-2">Images</p>
-          <div className="grid grid-cols-2 gap-2">
-            {images.map((image, index) => (
-              <img key={index} src={image} alt={`Listing image ${index + 1}`} className="w-full h-32 object-cover rounded" />
-            ))}
-          </div> */}
+                    {/* Second 50% - Images */}
+                    <div className="h-1/2 w-full">
+                        <div className="flex flex-wrap h-full">
+                            {/* Photo 1 */}
+                            <div className="w-1/2 h-[50%] bg-black flex justify-center items-center">
+                                <img src={im1} alt="Image 1" className="w-full h-full object-cover" />
+                            </div>
+
+                            {/* Photo 2 */}
+                            <div className="w-1/2 h-[50%] bg-red-500 flex justify-center items-center">
+                                <img src={im2} alt="Image 2" className="w-full h-full object-cover" />
+                            </div>
+
+                            {/* Photo 3 */}
+                            <div className="w-1/2 h-[50%] bg-green-500 flex justify-center items-center">
+                                <img src={im3} alt="Image 3" className="w-full h-full object-cover" />
+                            </div>
+
+                            {/* Photo 4 */}
+                            <div className="w-1/2 h-[50%] bg-blue-500 flex justify-center items-center">
+                                <img src="https://picsum.photos/500/300" alt="Image 4" className="w-full h-full object-cover" />
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
+
             </div>
         </div>
     );

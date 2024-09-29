@@ -4,14 +4,17 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import LoginForm from "./loginform";
+import Link from "next/link";
 
 export default function RightSide() {
   return (
-    <div className="relative bg-white p-10 rounded-lg shadow-lg flex flex-col justify-center ml-[33rem] w-[35rem] h-[42rem] z-0 px-[6rem]">
+    <div className="relative bg-white rounded-lg shadow-lg flex flex-col justify-center ml-[36rem] w-[638px] h-[796px] z-0 px-[8rem]">
       <div className="mb-[2rem]">
-        <h2 className="text-4xl font-bold text-gray-800 mb-2">Hello!</h2>
-        <p className="text-gray-500">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      <h2 className="text-4xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-secondary to-[#73A4C5] bg-clip-text text-transparent inline-block text-[40px]">
+      Hello!
+    </h2>        
+    <p className="text-gray-500">
+          Login to your account and start managing your renting/rents efficiently.
         </p>
       </div>
       <LoginForm/>
@@ -23,9 +26,9 @@ export default function RightSide() {
       <div className="text-center">
         <p className="text-gray-500">
           Don’t have an account?{" "}
-          <a href="#" className="text-blue-500 hover:underline">
+          <Link href="/signup" passHref className="text-blue-500 hover:underline">
             Sign up
-          </a>
+            </Link>
         </p>
       </div>
     </div>

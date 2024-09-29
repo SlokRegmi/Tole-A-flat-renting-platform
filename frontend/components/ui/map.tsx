@@ -4,25 +4,28 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import ListingModal from './listingdialog'; // Modal component
 
-// Fix for marker icon issue in Leaflet (React apps often fail to load default icons correctly)
-const DefaultIcon = L.icon({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
+// Define secondary color (You can also use your Tailwind CSS secondary color class here)
+const secondaryColor = '#385A71'; // Example secondary color, adjust this value based on your design
 
-L.Marker.prototype.options.icon = DefaultIcon;
+// Custom marker icon with secondary color using SVG and the color defined above
+const CustomColoredMarker = L.divIcon({
+  className: 'custom-marker',
+  html: `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="${secondaryColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin"><path d="M21 10c0 4.667-9 12-9 12S3 14.667 3 10a9 9 0 1 1 18 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+  popupAnchor: [0, -40],
+});
 
 interface Location {
   name: string;
   lat: number;
   lng: number;
+  id: number;
+  im1:string;
+  im2:string;
+  im3:string;
+  im4:string;
 }
-
 interface MapComponentProps {
   locations: Location[];  // Accept locations as a prop
 }
@@ -48,38 +51,47 @@ const MapComponent: React.FC<MapComponentProps> = ({ locations }) => {
   if (!isClient) {
     return null;
   }
+  console.log(locations)
 
   return (
-    <div className="w-full h-full relative">
-      <MapContainer
-        center={defaultCenter}
-        zoom={12}
-        scrollWheelZoom={true}
-        preferCanvas={true}
-        className="w-full h-full"
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        {locations.map((loc, index) => (
-          <Marker
-            key={index}
-            position={[loc.lat, loc.lng]}
-            eventHandlers={{ click: () => handleMarkerClick(loc) }}
+    <>
+      <div className="w-full h-full relative z-[96]">
+        <MapContainer
+          center={defaultCenter}
+          zoom={13}
+          scrollWheelZoom={true}
+          preferCanvas={true}
+          className="w-full h-full rounded-xl"
+        >
+          {/* OpenStreetMap Tile Layer */}
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-        ))}
-      </MapContainer>
+          {locations.map((loc, index) => (
+            <Marker
+              key={index}
+              position={[loc.lat, loc.lng]}
+              icon={CustomColoredMarker} // Use the custom marker with secondary color
+              eventHandlers={{ click: () => handleMarkerClick(loc) }}
+            />
+          ))}
+        </MapContainer>
+      </div>
 
       {/* Modal Dialog */}
       <ListingModal
         isOpen={!!selectedLocation}
         onClose={handleCloseModal}
         title={selectedLocation?.name || ''}
-        lat={selectedLocation ? selectedLocation.lat: 0}
-        lng={selectedLocation ? selectedLocation.lng: 0}
+        lat={selectedLocation ? selectedLocation.lat : 0}
+        lng={selectedLocation ? selectedLocation.lng : 0}
+        im1={selectedLocation ? selectedLocation.im1 : ''}
+        im2={selectedLocation ? selectedLocation.im2 : ''}
+        im3={selectedLocation ? selectedLocation.im3 : ''}
+        im4={selectedLocation ? selectedLocation.im4 : ''}
       />
-    </div>
+    </>
   );
 };
 

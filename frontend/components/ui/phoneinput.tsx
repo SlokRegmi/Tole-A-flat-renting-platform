@@ -33,7 +33,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
 
   return (
     <div className="w-full max-w-sm">
-      <Label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+      <Label htmlFor={id} className="block  mb-1 text-[16px]">
         {label}
       </Label>
       <div className="flex">

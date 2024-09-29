@@ -2,20 +2,16 @@ import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import ListingModal from './listingdialog'; // Modal component
+import { MapPin } from 'lucide-react'; // Import Lucide icon
 
-// Fix for marker icon issue in Leaflet (React apps often fail to load default icons correctly)
-const DefaultIcon = L.icon({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
+// Custom Lucide marker icon
+const CustomLucideMarker = L.divIcon({
+  className: 'custom-lucide-marker',
+  html: `<div style="color:#EED4A1; font-size: 40px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin"><path d="M21 10c0 4.667-9 12-9 12S3 14.667 3 10a9 9 0 1 1 18 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>`,
+  iconSize: [40, 40], // You can adjust the size as needed
+  iconAnchor: [20, 40], // Adjust anchor to center the icon
+  popupAnchor: [0, -40] // Popup anchor position
 });
-
-L.Marker.prototype.options.icon = DefaultIcon;
 
 interface Location {
   name: string;
@@ -39,7 +35,7 @@ const ListingMapComponent: React.FC<MapComponentProps> = ({ locations }) => {
   if (!isClient) {
     return null;
   }
-  
+
   const defaultCenter = locations.length > 0
     ? { lat: locations[0].lat, lng: locations[0].lng }
     : { lat: 27.676916, lng: 85.3222305 }; // Fallback to Lalitpur if no locations are provided
@@ -58,12 +54,16 @@ const ListingMapComponent: React.FC<MapComponentProps> = ({ locations }) => {
         className="w-full h-full"
         zoomControl={false} // Optionally hide zoom controls
       >
+        {/* Dark mode Stadia Maps Tile Layer */}
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://stadiamaps.com">Stadia Maps</a>'
         />
+
+        {/* Custom Lucide marker */}
         <Marker
           position={[locations[0].lat, locations[0].lng]}
+          icon={CustomLucideMarker} // Use the custom Lucide icon for the marker
         />
       </MapContainer>
     </div>

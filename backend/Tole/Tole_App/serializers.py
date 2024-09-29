@@ -1,22 +1,26 @@
 from rest_framework import serializers
 
 from .models import Place, User
+from rest_framework import serializers
+from .models import User
+from rest_framework import serializers
+from .models import User
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id','firstname','lastname','email','phoneno','password']
+        fields = ['id', 'firstname', 'lastname', 'email', 'phoneno', 'password']
         extra_kwargs = {
-            'password':{'write_only':True}
+            'password': {'write_only': True}  # Password will only be writable, not readable
         }
         
     def create(self, validated_data):
-            password = validated_data.pop('password',None)
-            instance = self.Meta.model(**validated_data)
-            if password is not None:
-                instance.set_password(password)
-            instance.save()
-            return instance
-
+        password = validated_data.pop('password', None)  # Extract password from validated data
+        instance = self.Meta.model(**validated_data)  # Create the user instance without password
+        if password:
+            instance.set_password(password)  # Hash the password
+        instance.save()
+        return instance
 
 
 class PlaceSerializer(serializers.ModelSerializer):
@@ -28,7 +32,7 @@ class PlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Place
         fields = [
-            'id',
+            
             'name',
             'latitude',
             'longitude',
@@ -63,3 +67,19 @@ class PlaceSerializer(serializers.ModelSerializer):
         if obj.image4 and hasattr(obj.image4, 'url'):
             return obj.image4.url
         return None
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id','firstname','lastname','email','phoneno','password']
+        extra_kwargs = {
+            'password':{'write_only':True}
+        }
+        
+    def create(self, validated_data):
+            password = validated_data.pop('password',None)
+            instance = self.Meta.model(**validated_data)
+            if password is not None:
+                instance.set_password(password)
+            instance.save()
+            return instance
