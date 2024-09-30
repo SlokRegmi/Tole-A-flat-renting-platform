@@ -95,12 +95,6 @@ Tole is structured as a client-server application with a clear separation of con
 - Backend Hosting: Heroku or AWS Elastic Beanstalk for scalable backend services.
 - CI/CD Pipeline: Automated testing and deployment using GitHub Actions.
 
-### 7. System Architecture Diagram
-
-![System Architecture Diagram](https://via.placeholder.com/800x400.png?text=System+Architecture+Diagram)
-
-*(Note: Replace the placeholder with an actual diagram illustrating the interactions between the frontend, backend, database, and external APIs.)*
-
 ---
 
 ## Installation and Setup Guide
