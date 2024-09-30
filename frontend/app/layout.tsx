@@ -31,7 +31,7 @@ export default function RootLayout({
         {/* Wrap the app with the AuthProvider */}
         <AuthProvider>
           {showNavBar && <NavBar />}
-          <main className={`flex-grow ${showNavBar ? 'pt-[96px]' : ''}`}>
+          <main className={`flex-grow ${showNavBar ? '' : ''}`}>
             {children}
           </main>
           <Footer />

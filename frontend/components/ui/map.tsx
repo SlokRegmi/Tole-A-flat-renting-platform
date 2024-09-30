@@ -21,10 +21,6 @@ interface Location {
   lat: number;
   lng: number;
   id: number;
-  im1:string;
-  im2:string;
-  im3:string;
-  im4:string;
 }
 interface MapComponentProps {
   locations: Location[];  // Accept locations as a prop
@@ -86,10 +82,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ locations }) => {
         title={selectedLocation?.name || ''}
         lat={selectedLocation ? selectedLocation.lat : 0}
         lng={selectedLocation ? selectedLocation.lng : 0}
-        im1={selectedLocation ? selectedLocation.im1 : ''}
-        im2={selectedLocation ? selectedLocation.im2 : ''}
-        im3={selectedLocation ? selectedLocation.im3 : ''}
-        im4={selectedLocation ? selectedLocation.im4 : ''}
+        id={selectedLocation ? selectedLocation.id : 0}
+
       />
     </>
   );

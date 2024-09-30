@@ -67,6 +67,10 @@ const LoginForm: React.FC = () => {
       <Button type="submit" className="w-full text-[24px]">
         Login
       </Button>
+      <Button  className="w-full" variant={"secondary"}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="24px" height="24px"><g id="Layer_1"><rect x="15" y="13" width="10" height="4" /><path d="M22.733,13C22.899,13.641,23,14.307,23,15c0,4.418-3.582,8-8,8s-8-3.582-8-8s3.582-8,8-8c2.009,0,3.84,0.746,5.245,1.969l2.841-2.84C20.952,4.185,18.116,3,15.003,3C8.374,3,3,8.373,3,15s5.374,12,12.003,12c10.01,0,12.266-9.293,11.327-14H22.733z" /></g></svg>
+              <span className='ml-1 text-[24px]'>Sign in with Google</span>
+            </Button>
 
       {errorMessage && (
         <p style={{ color: 'red' }}>{errorMessage}</p> // Display error message if login fails

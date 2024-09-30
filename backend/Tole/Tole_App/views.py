@@ -224,15 +224,14 @@ class PlaceCreateView(APIView):
 class PlaceDetailView(APIView):
     def get(self, request, *args, **kwargs):
             places = Place.objects.all()
-            data = [{'name':place.name,'lat' : place.latitude, 'lng' : place.longitude, 'id' : place.place_id, 'im1': "https://asset.cloudinary.com/dj2dxlequ/893e89a8bbe473e308f4c9c5a23113b5", "im2" : "https://asset.cloudinary.com/dj2dxlequ/02dd548ab8beaa18fb56cc9b162fad5a", "im3" : "https://asset.cloudinary.com/dj2dxlequ/fd3514f1600791caef7ec16127170fb9", "im4" : "https://asset.cloudinary.com/dj2dxlequ/c2191f1647769ed9a691cb954de932a8"} for place in places]
+            data = [{'name':place.name,'lat' : place.latitude, 'lng' : place.longitude, 'id' : place.place_id} for place in places]
             return Response(data, status=status.HTTP_200_OK)
         
 
 
 class PlaceDescriptionView(APIView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request,place_id, *args, **kwargs):
 
-        place_id = request.data['place_id']
         place = Place.objects.filter(place_id=place_id).first()
         if place:
             serializer = PlaceSerializer(place)
@@ -242,40 +241,98 @@ class PlaceDescriptionView(APIView):
 
 import uuid
 
-class Payment(APIView):
+import uuid
+from django.urls import reverse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import User, Place
 
+import requests
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.urls import reverse
+
+import uuid
+import requests
+from django.urls import reverse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import User, Place
+
+import uuid
+import requests
+from django.urls import reverse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import User, Place
+
+import requests
+import uuid
+from django.urls import reverse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import User, Place
+
+class PaymentInitiateView(APIView):
     def post(self, request, *args, **kwargs):
-        # Generate unique purchase order ID
-        purchase_order_id = str(uuid.uuid4())  # Unique ID for the order
-        user =  User.objects.get(id=request.data['id'])  
-        place = Place.objects.get(place_id=request.data['place_id'])      
+        try:
+            # Generate unique purchase order ID
+            purchase_order_id = str(uuid.uuid4())
 
-        data = {
-            "return_url": request.build_absolute_uri(reverse('payment_success')),  # Return URL
-            "website_url": request.build.absolute_uri(reverse('places')),  # Website URL
-            "amount": place.price,  # Amount in paisa (100 paisa = 1 NPR)
-            "purchase_order_id": purchase_order_id,  # Dynamic purchase order ID
-            "purchase_order_name": "Room renting",
-            "customer_info": {
-                "name": user.first_name,
-                "email": user.email,
-                "phone": user.phone_no
+            # Fetch user and place details
+            user = User.objects.get(firstname=request.data['firstname'])
+            place = Place.objects.get(place_id=request.data['place_id'])
+
+            # Prepare the data to send to Khalti
+            payment_data = {
+                "return_url": request.build_absolute_uri(reverse('payment_success')),
+                "website_url": request.build_absolute_uri(reverse('places', args=[place.place_id])),
+                "amount": 100000,  # in paisa (100 paisa = 1 NPR)
+                "purchase_order_id": purchase_order_id,
+                "purchase_order_name": "Room renting",
+                "customer_info": {
+                    "name": user.first_name,
+                    "email": user.email,
+                    "phone": user.phoneno,
+                }
             }
-        }
 
-        headers = {
-            "Authorization": f"Key {settings.KHALTI_SECRET_KEY}",
-            "Content-Type": "application/json"
-        }
+            # Send the request to Khalti API
+            response = requests.post(
+                "https://test-pay.khalti.com/api/v2/initiate_payment/",
+                json=payment_data,
+                headers={"Authorization": "Key " + settings.KHALTI_SECRET_KEY}
+            )
 
-        response = requests.post('https://a.khalti.com/api/v2/epayment/initiate/', json=data, headers=headers)
+            # Check if the request to Khalti was successful
+            if response.status_code == 200:
+                payment_url = response.json().get('payment_url')
+                return Response({"payment_url": payment_url}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Failed to initiate payment with Khalti", "details": response.content.decode()}, status=response.status_code)
 
-        if response.status_code == 200:
-            payment_data = response.json()
-            return redirect(payment_data['payment_url'])
-        else:
-            return JsonResponse({"error": response.json()}, status=response.status_code)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Place.DoesNotExist:
+            return Response({"error": "Place not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": f"Internal server error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
+class PaymentSuccessView(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            # You can handle the payment success here
+            # E.g., updating the order status in your database
+            return Response({"message": "Payment successful"}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": f"Internal server error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # Google AUTH 
 

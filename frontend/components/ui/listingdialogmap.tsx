@@ -41,7 +41,7 @@ const ListingMapComponent: React.FC<MapComponentProps> = ({ locations }) => {
     : { lat: 27.676916, lng: 85.3222305 }; // Fallback to Lalitpur if no locations are provided
 
   return (
-    <div className="w-full h-[500px] relative">
+    <div className="w-full h-full relative">
       <MapContainer
         center={defaultCenter}
         zoom={12}

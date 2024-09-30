@@ -1,5 +1,5 @@
 'use client'
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ProgressBar from '@/components/payment/progressbar';
 import Image from 'next/image';
 import { addDays, format } from "date-fns"
@@ -29,6 +29,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { useRouter, useSearchParams } from 'next/navigation';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 // Payment method options
 const frameworks = [
     {
@@ -45,21 +48,22 @@ const frameworks = [
 const banks = [
     {
         value: "bankA",
-        label: "Bank A",
+        label: "ESEWA",
     },
     {
         value: "bankB",
-        label: "Bank B",
+        label: "KHALTI",
     },
     {
         value: "bankC",
-        label: "Bank C",
+        label: "TEROPAY",
     },
 ];
 
 const PaymentPage = () => {
     const currentStep = 1.8;
-
+    const searchParams = useSearchParams(); // Use useSearchParams to get query params
+    const id = searchParams.get('place_id'); // Retrieve the 'id' from the query
     // Set the default value for the payment method to "online"
     const [open, setOpen] = React.useState(false);
     const [value, setValue] = React.useState("online");
@@ -69,13 +73,71 @@ const PaymentPage = () => {
     const [bankValue, setBankValue] = React.useState("");
     const [date, setDate] = React.useState<Date>()
     const [enddate, setendDate] = React.useState<Date>()
+    const router = useRouter();
+    const [placeData, setPlaceData] = useState(null); // State to store place information
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null); // Error state with `string | null`
+    const { user } = useAuth(); // Access the user object from the AuthContext
 
+    const initiatePayment = async () => {
+        try {
+            const response = await axios.post('http://localhost:8000/api/payment/initiate', {
+                firstname: user.firstname,
+                place_id: id, // Place ID from props
+            });
+    
+            // Redirect to Khalti payment page
+            if (response.data.payment_url) {
+                window.location.href = response.data.payment_url;
+            }
+        } catch (error) {
+            console.error('Payment initiation failed:', error);
+        }
+    };
+    
+    const handleBack = () => {
+      router.back(); // Navigates to the previous page in the browser history
+    };
+// Function to fetch place details from the backend
+const fetchPlaceDetails = async (id: string) => {
+    try {
+        // Correctly interpolate the id variable using template literals
+        
+        const response = await axios.get(`http://localhost:8000/api/places/${id}`);
+        setPlaceData(response.data);
+        console.log(response.data);
+        setLoading(false);
+    } catch (err) {
+        if (axios.isAxiosError(err)) {
+            // Axios error handling
+            setError(err.response?.data?.error || 'An error occurred while fetching the place details.');
+        } else {
+            // Generic error handling
+            setError("An unexpected error occurred.");
+        }
+        setLoading(false);
+    }
+};
+
+  // Fetch place details when the component mounts
+  useEffect(() => {
+    if (id) {
+        fetchPlaceDetails(id);
+    }
+}, [id]);
+  
     return (
-        <><div className='absolute mt-[150px] ml-[48px]'>
-        <ArrowLeft size={30}/>
-
-        </div>
-            <div className="min-h-screen flex flex-col items-center justify-center pt-[100px] w-full space-y-[32px] overflow-visible">
+        
+        <>
+          <button
+          onClick={handleBack}
+          className="absolute top-32 left-8 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition"
+        >
+          <ArrowLeft className="h-6 w-6 text-gray-800" />
+        </button>
+            <div className="min-h-screen flex flex-col items-center justify-center pt-[100px] w-full space-y-[32px] overflow-visible mb-10">
+          
+        
                 <div className="flex items-center justify-center w-[1052px] h-[79px]">
                     <ProgressBar currentStep={currentStep} />
                 </div>
@@ -93,8 +155,8 @@ const PaymentPage = () => {
                         </div>
 
                         <div className="mt-[18px] px-[45px] space-y-[28px] rounded-xl">
-                            <div className="font-bold text-xl mb-2">Rent name - owner details</div>
-                            <p className="text-gray-700 text-base">Room dimensions:</p>
+                            <div className="font-bold text-xl mb-2">{placeData?.name}</div>
+                            <p className="text-gray-700 text-base">Room dimensions: 1000 * 1000 sqft.</p>
 
                             <div className="flex flex-col">
                                 <p className="text-gray-700 text-base">Renting dates:</p>
@@ -141,7 +203,7 @@ const PaymentPage = () => {
                             </div>
 
                             <p className="text-gray-700 text-xl font-bold">
-                                Rent: NRs 1,00,000 per month
+                                Rent: NRs 1,000 per month
                             </p>
                         </div>
                     </div>
@@ -265,7 +327,7 @@ const PaymentPage = () => {
                             <div className='flex justify-between items-center'>
                                 <Label className='text-xl'>Amount (NRS)</Label>
                                 <Input
-                                    value="1,00,000 per month"
+                                    value="1,000 per month"
                                     type="text"
                                     className="w-[369px] h-[58px] border-gray-300 rounded-md bg-gray-200 text-gray-500 cursor-not-allowed text-base"
                                     disabled
@@ -283,7 +345,7 @@ const PaymentPage = () => {
 
                 </div>
                 <div className='w-full px-[63px] flex justify-end'>
-<Button variant="default" className="w-[150px] h-[50px] text-xl">Proceed</Button>
+<Button variant="default" className="w-[150px] h-[50px] text-xl" onClick={initiatePayment}>Proceed</Button>
 </div>
             </div>
         </>
